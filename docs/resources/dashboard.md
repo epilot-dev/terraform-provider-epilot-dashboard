@@ -25,12 +25,12 @@ resource "epilot-dashboard_dashboard" "my_dashboard" {
 
 ### Required
 
-- `tiles` (String) Requires replacement if changed.; Parsed as JSON.
-- `title` (String) Requires replacement if changed.
+- `tiles` (String) Parsed as JSON.
+- `title` (String)
 
 ### Optional
 
-- `id` (String) Unique identifier for dashboard. Requires replacement if changed.
+- `id` (String) Unique identifier for dashboard
 
 ## Import
 

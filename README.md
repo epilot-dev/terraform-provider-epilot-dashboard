@@ -20,7 +20,6 @@ Dashboard API: API to store the dashboard configuration for the epilot 360 dashb
 ## Table of Contents
 <!-- $toc-max-depth=2 -->
 * [epilot-dashboard](#epilot-dashboard)
-  * [🏗 **Welcome to your new Terraform Provider!** 🏗](#welcome-to-your-new-terraform-provider)
   * [Installation](#installation)
   * [Available Resources and Data Sources](#available-resources-and-data-sources)
   * [Testing the provider locally](#testing-the-provider-locally)
@@ -39,7 +38,7 @@ terraform {
   required_providers {
     epilot-dashboard = {
       source  = "epilot-dev/epilot-dashboard"
-      version = "0.15.1"
+      version = "0.15.2"
     }
   }
 }

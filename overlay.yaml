@@ -23,7 +23,7 @@ actions:
   - target: $["paths"]["/v1/dashboard/dashboards/{id}"]["get"]
     update:
       x-speakeasy-entity-operation: Dashboard#get
-  - target: $["paths"]["/v1/dashboard/dashboards/{id}"]["patch"]
+  - target: $["paths"]["/v1/dashboard/dashboards/{id}"]["put"]
     update:
       x-speakeasy-entity-operation: Dashboard#update
   - target: $["paths"]["/v1/dashboard/dashboards/{id}"]["delete"]
