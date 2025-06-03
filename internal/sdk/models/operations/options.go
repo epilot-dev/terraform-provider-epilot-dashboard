@@ -4,8 +4,8 @@ package operations
 
 import (
 	"errors"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/internal/utils"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/retry"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/internal/utils"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/retry"
 	"time"
 )
 

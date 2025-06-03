@@ -4,8 +4,8 @@ package provider
 
 import (
 	"context"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/models/shared"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/shared"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -14,32 +14,33 @@ import (
 	"net/http"
 )
 
-var _ provider.Provider = &EpilotProductProvider{}
+var _ provider.Provider = &EpilotDashboardProvider{}
 
-type EpilotProductProvider struct {
+type EpilotDashboardProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
 }
 
-// EpilotProductProviderModel describes the provider data model.
-type EpilotProductProviderModel struct {
+// EpilotDashboardProviderModel describes the provider data model.
+type EpilotDashboardProviderModel struct {
 	ServerURL  types.String `tfsdk:"server_url"`
 	EpilotAuth types.String `tfsdk:"epilot_auth"`
 	EpilotOrg  types.String `tfsdk:"epilot_org"`
 }
 
-func (p *EpilotProductProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "epilot-product"
+func (p *EpilotDashboardProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "epilot-dashboard"
 	resp.Version = p.version
 }
 
-func (p *EpilotProductProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *EpilotDashboardProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: `Dashboard API: API to store the dashboard configuration for the epilot 360 dashboard`,
 		Attributes: map[string]schema.Attribute{
 			"server_url": schema.StringAttribute{
-				MarkdownDescription: "Server URL (defaults to https://product.sls.epilot.io)",
+				MarkdownDescription: "Server URL (defaults to https://dashboard.sls.epilot.io)",
 				Optional:            true,
 				Required:            false,
 			},
@@ -55,8 +56,8 @@ func (p *EpilotProductProvider) Schema(ctx context.Context, req provider.SchemaR
 	}
 }
 
-func (p *EpilotProductProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data EpilotProductProviderModel
+func (p *EpilotDashboardProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var data EpilotDashboardProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
@@ -67,7 +68,7 @@ func (p *EpilotProductProvider) Configure(ctx context.Context, req provider.Conf
 	ServerURL := data.ServerURL.ValueString()
 
 	if ServerURL == "" {
-		ServerURL = "https://product.sls.epilot.io"
+		ServerURL = "https://dashboard.sls.epilot.io"
 	}
 
 	epilotAuth := new(string)
@@ -101,27 +102,21 @@ func (p *EpilotProductProvider) Configure(ctx context.Context, req provider.Conf
 	resp.ResourceData = client
 }
 
-func (p *EpilotProductProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *EpilotDashboardProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewCouponResource,
-		NewPriceResource,
-		NewProductResource,
-		NewTaxResource,
+		NewDashboardResource,
 	}
 }
 
-func (p *EpilotProductProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *EpilotDashboardProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewCouponDataSource,
-		NewPriceDataSource,
-		NewProductDataSource,
-		NewTaxDataSource,
+		NewDashboardDataSource,
 	}
 }
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &EpilotProductProvider{
+		return &EpilotDashboardProvider{
 			version: version,
 		}
 	}

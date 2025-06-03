@@ -1,12 +1,12 @@
 terraform {
   required_providers {
-    epilot-product = {
-      source  = "epilot-dev/epilot-product"
-      version = "0.13.2"
+    epilot-dashboard = {
+      source  = "epilot-dev/epilot-dashboard"
+      version = "0.15.1"
     }
   }
 }
 
-provider "epilot-product" {
+provider "epilot-dashboard" {
   # Configuration options
 }

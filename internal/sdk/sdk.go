@@ -5,19 +5,17 @@ package sdk
 import (
 	"context"
 	"fmt"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/internal/hooks"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/internal/utils"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/models/shared"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/retry"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/internal/hooks"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/internal/utils"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/shared"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/retry"
 	"net/http"
 	"time"
 )
 
 // ServerList contains the list of servers available to the SDK
 var ServerList = []string{
-	"https://product.sls.epilot.io",
-	// Production server
-	"https://product.sls.epilot.io",
+	"https://dashboard.sls.epilot.io",
 }
 
 // HTTPClient provides an interface for suplying the SDK with a custom HTTP client
@@ -69,15 +67,11 @@ func (c *sdkConfiguration) GetServerDetails() (string, map[string]string) {
 	return ServerList[c.ServerIndex], nil
 }
 
+// SDK - Dashboard API: API to store the dashboard configuration for the epilot 360 dashboard
 type SDK struct {
-	// Coupon operations
-	Coupon *Coupon
-	// Price operations
-	Price *Price
-	// Product operations
-	Product *Product
-	// Tax operations
-	Tax *Tax
+	Dashboards     *Dashboards
+	Examples       *Examples
+	Visualisations *Visualisations
 
 	sdkConfiguration sdkConfiguration
 }
@@ -154,10 +148,10 @@ func New(opts ...SDKOption) *SDK {
 	sdk := &SDK{
 		sdkConfiguration: sdkConfiguration{
 			Language:          "go",
-			OpenAPIDocVersion: "1.0.0",
-			SDKVersion:        "0.13.2",
+			OpenAPIDocVersion: "0.0.1",
+			SDKVersion:        "0.15.1",
 			GenVersion:        "2.497.0",
-			UserAgent:         "speakeasy-sdk/terraform 0.13.2 2.497.0 1.0.0 github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk",
+			UserAgent:         "speakeasy-sdk/terraform 0.15.1 2.497.0 0.0.1 github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk",
 			Hooks:             hooks.New(),
 		},
 	}
@@ -177,13 +171,11 @@ func New(opts ...SDKOption) *SDK {
 		sdk.sdkConfiguration.ServerURL = serverURL
 	}
 
-	sdk.Coupon = newCoupon(sdk.sdkConfiguration)
+	sdk.Dashboards = newDashboards(sdk.sdkConfiguration)
 
-	sdk.Price = newPrice(sdk.sdkConfiguration)
+	sdk.Examples = newExamples(sdk.sdkConfiguration)
 
-	sdk.Product = newProduct(sdk.sdkConfiguration)
-
-	sdk.Tax = newTax(sdk.sdkConfiguration)
+	sdk.Visualisations = newVisualisations(sdk.sdkConfiguration)
 
 	return sdk
 }

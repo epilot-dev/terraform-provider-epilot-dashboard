@@ -28,7 +28,7 @@ go:
   outputModelSuffix: output
   packageName: openapi
 terraform:
-  version: 0.13.2
+  version: 0.15.1
   additionalDataSources: []
   additionalDependencies: {}
   additionalResources: []
@@ -47,4 +47,4 @@ terraform:
       webhooks: webhooks
   inputModelSuffix: input
   outputModelSuffix: output
-  packageName: epilot-product
+  packageName: epilot-dashboard

@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/epilot-dev/terraform-provider-epilot-product/internal/sdk/retry"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/retry"
 	"math"
 	"math/rand"
 	"net/http"

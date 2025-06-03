@@ -3,7 +3,7 @@ speakeasyVersion: latest
 sources:
     my-source:
         inputs:
-            - location: https://docs.api.epilot.io/product.yaml
+            - location: https://docs.api.epilot.io/dashboard.yaml
         overlays:
             - location: overlay.yaml
         registry:

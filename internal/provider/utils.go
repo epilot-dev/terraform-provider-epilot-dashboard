@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	tfReflect "github.com/epilot-dev/terraform-provider-epilot-product/internal/provider/reflect"
+	tfReflect "github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/provider/reflect"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"

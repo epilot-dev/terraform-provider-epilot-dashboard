@@ -1,12 +1,12 @@
 lockVersion: 2.0.0
 id: 5a857039-7f4b-42d5-86fd-449767242ed2
 management:
-  docChecksum: 78906e12510e40d7a0542d3f3d1af1d2
-  docVersion: 1.0.0
+  docChecksum: 5c72a9268be23452215b09edbe6f57e7
+  docVersion: 0.0.1
   speakeasyVersion: 1.477.0
   generationVersion: 2.497.0
-  releaseVersion: 0.13.2
-  configChecksum: 1780bf7cb790b98fc91aacbc52331119
+  releaseVersion: 0.15.1
+  configChecksum: fd7797f410ce9414dce5af84c5518410
   repoURL: https://github.com/epilot-dev/terraform-provider-epilot-product.git
   repoSubDirectory: .
   published: true
@@ -21,31 +21,21 @@ features:
     unions: 2.85.0
   terraform:
     additionalDependencies: 0.1.0
-    constsAndDefaults: 0.2.0
+    additionalProperties: 0.1.2
     core: 3.29.0
     envVarSecurityUsage: 0.1.0
     globalSecurity: 2.81.9
     globalServerURLs: 2.82.1
-    nullables: 0.0.0
     retries: 2.81.2
     typeOverrides: 2.81.1
 generatedFiles:
   - .gitattributes
   - USAGE.md
   - examples/README.md
-  - examples/data-sources/epilot-product_coupon/data-source.tf
-  - examples/data-sources/epilot-product_price/data-source.tf
-  - examples/data-sources/epilot-product_product/data-source.tf
-  - examples/data-sources/epilot-product_tax/data-source.tf
+  - examples/data-sources/epilot-dashboard_dashboard/data-source.tf
   - examples/provider/provider.tf
-  - examples/resources/epilot-product_coupon/import.sh
-  - examples/resources/epilot-product_coupon/resource.tf
-  - examples/resources/epilot-product_price/import.sh
-  - examples/resources/epilot-product_price/resource.tf
-  - examples/resources/epilot-product_product/import.sh
-  - examples/resources/epilot-product_product/resource.tf
-  - examples/resources/epilot-product_tax/import.sh
-  - examples/resources/epilot-product_tax/resource.tf
+  - examples/resources/epilot-dashboard_dashboard/import.sh
+  - examples/resources/epilot-dashboard_dashboard/resource.tf
   - go.mod
   - go.sum
   - internal/planmodifiers/boolplanmodifier/suppress_diff.go
@@ -58,18 +48,10 @@ generatedFiles:
   - internal/planmodifiers/setplanmodifier/suppress_diff.go
   - internal/planmodifiers/stringplanmodifier/suppress_diff.go
   - internal/planmodifiers/utils/state_check.go
-  - internal/provider/coupon_data_source.go
-  - internal/provider/coupon_data_source_sdk.go
-  - internal/provider/coupon_resource.go
-  - internal/provider/coupon_resource_sdk.go
-  - internal/provider/price_data_source.go
-  - internal/provider/price_data_source_sdk.go
-  - internal/provider/price_resource.go
-  - internal/provider/price_resource_sdk.go
-  - internal/provider/product_data_source.go
-  - internal/provider/product_data_source_sdk.go
-  - internal/provider/product_resource.go
-  - internal/provider/product_resource_sdk.go
+  - internal/provider/dashboard_data_source.go
+  - internal/provider/dashboard_data_source_sdk.go
+  - internal/provider/dashboard_resource.go
+  - internal/provider/dashboard_resource_sdk.go
   - internal/provider/provider.go
   - internal/provider/reflect/diags.go
   - internal/provider/reflect/doc.go
@@ -85,21 +67,10 @@ generatedFiles:
   - internal/provider/reflect/primitive.go
   - internal/provider/reflect/slice.go
   - internal/provider/reflect/struct.go
-  - internal/provider/tax_data_source.go
-  - internal/provider/tax_data_source_sdk.go
-  - internal/provider/tax_resource.go
-  - internal/provider/tax_resource_sdk.go
-  - internal/provider/types/base_entity_acl.go
-  - internal/provider/types/base_entity_owner.go
-  - internal/provider/types/base_relation.go
-  - internal/provider/types/dollar_relation.go
-  - internal/provider/types/price_component_relation.go
-  - internal/provider/types/price_create_price_components.go
-  - internal/provider/types/price_tier.go
-  - internal/provider/types/promo_code.go
   - internal/provider/utils.go
   - internal/sdk/.gitattributes
-  - internal/sdk/coupon.go
+  - internal/sdk/dashboards.go
+  - internal/sdk/examples.go
   - internal/sdk/internal/hooks/hooks.go
   - internal/sdk/internal/utils/contenttype.go
   - internal/sdk/internal/utils/env.go
@@ -113,59 +84,28 @@ generatedFiles:
   - internal/sdk/internal/utils/security.go
   - internal/sdk/internal/utils/utils.go
   - internal/sdk/models/errors/sdkerror.go
-  - internal/sdk/models/operations/createcoupon.go
-  - internal/sdk/models/operations/createprice.go
-  - internal/sdk/models/operations/createproduct.go
-  - internal/sdk/models/operations/createtax.go
-  - internal/sdk/models/operations/deletecoupon.go
-  - internal/sdk/models/operations/deleteprice.go
-  - internal/sdk/models/operations/deleteproduct.go
-  - internal/sdk/models/operations/deletetax.go
-  - internal/sdk/models/operations/getcoupon.go
-  - internal/sdk/models/operations/getprice.go
-  - internal/sdk/models/operations/getproduct.go
-  - internal/sdk/models/operations/gettax.go
+  - internal/sdk/models/operations/createdashboard.go
+  - internal/sdk/models/operations/deletedashboard.go
+  - internal/sdk/models/operations/getdashboard.go
+  - internal/sdk/models/operations/listavailableexamples.go
+  - internal/sdk/models/operations/listavailablevisualisations.go
+  - internal/sdk/models/operations/listdashboards.go
   - internal/sdk/models/operations/options.go
-  - internal/sdk/models/operations/patchcoupon.go
-  - internal/sdk/models/operations/patchprice.go
-  - internal/sdk/models/operations/patchproduct.go
-  - internal/sdk/models/operations/patchtax.go
-  - internal/sdk/models/operations/updatecoupon.go
-  - internal/sdk/models/operations/updateprice.go
-  - internal/sdk/models/operations/updateproduct.go
-  - internal/sdk/models/operations/updatetax.go
-  - internal/sdk/models/shared/baseentityacl.go
-  - internal/sdk/models/shared/baseentityowner.go
-  - internal/sdk/models/shared/baserelation.go
-  - internal/sdk/models/shared/clienterror.go
-  - internal/sdk/models/shared/coupon.go
-  - internal/sdk/models/shared/couponcreate.go
-  - internal/sdk/models/shared/couponpatch.go
-  - internal/sdk/models/shared/price.go
-  - internal/sdk/models/shared/pricecomponentrelation.go
-  - internal/sdk/models/shared/pricecreate.go
-  - internal/sdk/models/shared/pricepatch.go
-  - internal/sdk/models/shared/pricetier.go
-  - internal/sdk/models/shared/pricetierdisplaymode.go
-  - internal/sdk/models/shared/product.go
-  - internal/sdk/models/shared/productcreate.go
-  - internal/sdk/models/shared/productpatch.go
-  - internal/sdk/models/shared/promocode.go
+  - internal/sdk/models/operations/putdashboard.go
+  - internal/sdk/models/shared/dashboard.go
+  - internal/sdk/models/shared/datalakequery.go
+  - internal/sdk/models/shared/example.go
   - internal/sdk/models/shared/security.go
-  - internal/sdk/models/shared/servererror.go
-  - internal/sdk/models/shared/tax.go
-  - internal/sdk/models/shared/taxcreate.go
-  - internal/sdk/models/shared/taxpatch.go
-  - internal/sdk/price.go
-  - internal/sdk/product.go
+  - internal/sdk/models/shared/visualisation.go
+  - internal/sdk/models/shared/visualisationid.go
   - internal/sdk/retry/config.go
   - internal/sdk/sdk.go
-  - internal/sdk/tax.go
   - internal/sdk/types/bigint.go
   - internal/sdk/types/date.go
   - internal/sdk/types/datetime.go
   - internal/sdk/types/decimal.go
   - internal/sdk/types/pointers.go
+  - internal/sdk/visualisations.go
   - internal/validators/DateValidator.go
   - internal/validators/ExactlyOneChild.go
   - internal/validators/JSONParseValidator.go
@@ -447,5 +387,53 @@ examples:
           application/json: {"message": "Entity not found", "status": 404}
         "500":
           application/json: {"message": "Entity not found", "status": 404}
+  createDashboard:
+    speakeasy-default-create-dashboard:
+      requestBody:
+        application/json: {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}
+      responses:
+        "201":
+          application/json: {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}
+  deleteDashboard:
+    speakeasy-default-delete-dashboard:
+      parameters:
+        path:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        "200":
+          application/json: {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}
+  getDashboard:
+    speakeasy-default-get-dashboard:
+      parameters:
+        path:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        "200":
+          application/json: {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}
+  listDashboards:
+    speakeasy-default-list-dashboards:
+      responses:
+        "200":
+          application/json: {"results": [{"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}, {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}]}
+  putDashboard:
+    speakeasy-default-put-dashboard:
+      parameters:
+        path:
+          id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      requestBody:
+        application/json: {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}
+      responses:
+        "200":
+          application/json: {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "tiles": [{"coordinates": {}, "id": "e4af1297-1fd6-440f-9846-f475f580d40f", "visualisation_config": {"options": {"type": "bar"}, "query": {"dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}}}], "title": "Employee Dashboard"}
+  listAvailableExamples:
+    speakeasy-default-list-available-examples:
+      responses:
+        "200":
+          application/json: {"results": [{"id": "e4af1297-1fd6-440f-9846-f475f580d40f", "query": {"0": "<", "1": "v", "2": "a", "3": "l", "4": "u", "5": "e", "6": ">", "dataset": "entity_operations", "dimensions": [{"time_with_granularity": "year-month"}], "filters": [{"entity_schema": "opportunity"}], "measure": "count_operations"}, "title": "Number of opportunities created by journeys every month", "visualisation": "timechart"}]}
+  listAvailableVisualisations:
+    speakeasy-default-list-available-visualisations:
+      responses:
+        "200":
+          application/json: {"results": [{"description": "Visualise your metrics with respect to time series", "package_name": "@epilot360/highcharts", "title": "Time Series Visualisation", "visualisation": "timechart"}, {"description": "Visualise your key performance indicators", "package_name": "@epilot360/highcharts", "title": "Time Series Visualisation", "visualisation": "timechart"}]}
 examplesVersion: 1.0.0
 generatedTests: {}
