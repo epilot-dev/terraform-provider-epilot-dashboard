@@ -7,6 +7,7 @@ import (
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/shared"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -14,7 +15,8 @@ import (
 	"net/http"
 )
 
-var _ provider.Provider = &EpilotDashboardProvider{}
+var _ provider.Provider = (*EpilotDashboardProvider)(nil)
+var _ provider.ProviderWithEphemeralResources = (*EpilotDashboardProvider)(nil)
 
 type EpilotDashboardProvider struct {
 	// version is set to the provider version on release, "dev" when the
@@ -25,9 +27,9 @@ type EpilotDashboardProvider struct {
 
 // EpilotDashboardProviderModel describes the provider data model.
 type EpilotDashboardProviderModel struct {
-	ServerURL  types.String `tfsdk:"server_url"`
 	EpilotAuth types.String `tfsdk:"epilot_auth"`
 	EpilotOrg  types.String `tfsdk:"epilot_org"`
+	ServerURL  types.String `tfsdk:"server_url"`
 }
 
 func (p *EpilotDashboardProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -37,22 +39,21 @@ func (p *EpilotDashboardProvider) Metadata(ctx context.Context, req provider.Met
 
 func (p *EpilotDashboardProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `Dashboard API: API to store the dashboard configuration for the epilot 360 dashboard`,
 		Attributes: map[string]schema.Attribute{
-			"server_url": schema.StringAttribute{
-				MarkdownDescription: "Server URL (defaults to https://dashboard.sls.epilot.io)",
-				Optional:            true,
-				Required:            false,
-			},
 			"epilot_auth": schema.StringAttribute{
-				Sensitive: true,
 				Optional:  true,
+				Sensitive: true,
 			},
 			"epilot_org": schema.StringAttribute{
-				Sensitive: true,
 				Optional:  true,
+				Sensitive: true,
+			},
+			"server_url": schema.StringAttribute{
+				Description: `Server URL (defaults to https://dashboard.sls.epilot.io)`,
+				Optional:    true,
 			},
 		},
+		MarkdownDescription: `Dashboard API: API to store the dashboard configuration for the epilot 360 dashboard`,
 	}
 }
 
@@ -71,25 +72,23 @@ func (p *EpilotDashboardProvider) Configure(ctx context.Context, req provider.Co
 		ServerURL = "https://dashboard.sls.epilot.io"
 	}
 
-	epilotAuth := new(string)
-	if !data.EpilotAuth.IsUnknown() && !data.EpilotAuth.IsNull() {
-		*epilotAuth = data.EpilotAuth.ValueString()
-	} else {
-		epilotAuth = nil
+	security := shared.Security{}
+
+	if !data.EpilotAuth.IsUnknown() {
+		security.EpilotAuth = data.EpilotAuth.ValueStringPointer()
 	}
-	epilotOrg := new(string)
-	if !data.EpilotOrg.IsUnknown() && !data.EpilotOrg.IsNull() {
-		*epilotOrg = data.EpilotOrg.ValueString()
-	} else {
-		epilotOrg = nil
+
+	if !data.EpilotOrg.IsUnknown() {
+		security.EpilotOrg = data.EpilotOrg.ValueStringPointer()
 	}
-	security := shared.Security{
-		EpilotAuth: epilotAuth,
-		EpilotOrg:  epilotOrg,
+
+	providerHTTPTransportOpts := ProviderHTTPTransportOpts{
+		SetHeaders: make(map[string]string),
+		Transport:  http.DefaultTransport,
 	}
 
 	httpClient := http.DefaultClient
-	httpClient.Transport = NewLoggingHTTPTransport(http.DefaultTransport)
+	httpClient.Transport = NewProviderHTTPTransport(providerHTTPTransportOpts)
 
 	opts := []sdk.SDKOption{
 		sdk.WithServerURL(ServerURL),
@@ -99,6 +98,7 @@ func (p *EpilotDashboardProvider) Configure(ctx context.Context, req provider.Co
 	client := sdk.New(opts...)
 
 	resp.DataSourceData = client
+	resp.EphemeralResourceData = client
 	resp.ResourceData = client
 }
 
@@ -112,6 +112,10 @@ func (p *EpilotDashboardProvider) DataSources(ctx context.Context) []func() data
 	return []func() datasource.DataSource{
 		NewDashboardDataSource,
 	}
+}
+
+func (p *EpilotDashboardProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
+	return []func() ephemeral.EphemeralResource{}
 }
 
 func New(version string) func() provider.Provider {
