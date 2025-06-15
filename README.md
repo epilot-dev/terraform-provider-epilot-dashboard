@@ -38,7 +38,7 @@ terraform {
   required_providers {
     epilot-dashboard = {
       source  = "epilot-dev/epilot-dashboard"
-      version = "0.15.2"
+      version = "0.16.0"
     }
   }
 }
