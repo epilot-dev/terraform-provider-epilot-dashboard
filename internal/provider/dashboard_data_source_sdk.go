@@ -3,16 +3,36 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/operations"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/shared"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func (r *DashboardDataSourceModel) RefreshFromSharedDashboard(resp *shared.Dashboard) {
+func (r *DashboardDataSourceModel) ToOperationsGetDashboardRequest(ctx context.Context) (*operations.GetDashboardRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var id string
+	id = r.ID.ValueString()
+
+	out := operations.GetDashboardRequest{
+		ID: id,
+	}
+
+	return &out, diags
+}
+
+func (r *DashboardDataSourceModel) RefreshFromSharedDashboard(ctx context.Context, resp *shared.Dashboard) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if resp != nil {
 		r.ID = types.StringPointerValue(resp.ID)
 		tilesResult, _ := json.Marshal(resp.Tiles)
 		r.Tiles = types.StringValue(string(tilesResult))
 		r.Title = types.StringValue(resp.Title)
 	}
+
+	return diags
 }
