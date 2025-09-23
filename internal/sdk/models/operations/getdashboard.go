@@ -11,11 +11,11 @@ type GetDashboardRequest struct {
 	ID string `pathParam:"style=simple,explode=false,name=id"`
 }
 
-func (o *GetDashboardRequest) GetID() string {
-	if o == nil {
+func (g *GetDashboardRequest) GetID() string {
+	if g == nil {
 		return ""
 	}
-	return o.ID
+	return g.ID
 }
 
 type GetDashboardResponse struct {
@@ -29,30 +29,30 @@ type GetDashboardResponse struct {
 	RawResponse *http.Response
 }
 
-func (o *GetDashboardResponse) GetContentType() string {
-	if o == nil {
+func (g *GetDashboardResponse) GetContentType() string {
+	if g == nil {
 		return ""
 	}
-	return o.ContentType
+	return g.ContentType
 }
 
-func (o *GetDashboardResponse) GetDashboard() *shared.Dashboard {
-	if o == nil {
+func (g *GetDashboardResponse) GetDashboard() *shared.Dashboard {
+	if g == nil {
 		return nil
 	}
-	return o.Dashboard
+	return g.Dashboard
 }
 
-func (o *GetDashboardResponse) GetStatusCode() int {
-	if o == nil {
+func (g *GetDashboardResponse) GetStatusCode() int {
+	if g == nil {
 		return 0
 	}
-	return o.StatusCode
+	return g.StatusCode
 }
 
-func (o *GetDashboardResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (g *GetDashboardResponse) GetRawResponse() *http.Response {
+	if g == nil {
 		return nil
 	}
-	return o.RawResponse
+	return g.RawResponse
 }

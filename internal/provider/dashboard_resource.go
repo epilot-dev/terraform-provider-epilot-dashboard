@@ -6,12 +6,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk"
-	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/operations"
-	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/validators"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -26,14 +24,15 @@ func NewDashboardResource() resource.Resource {
 
 // DashboardResource defines the resource implementation.
 type DashboardResource struct {
+	// Provider configured SDK client.
 	client *sdk.SDK
 }
 
 // DashboardResourceModel describes the resource data model.
 type DashboardResourceModel struct {
-	ID    types.String `tfsdk:"id"`
-	Tiles types.String `tfsdk:"tiles"`
-	Title types.String `tfsdk:"title"`
+	ID    types.String         `tfsdk:"id"`
+	Tiles jsontypes.Normalized `tfsdk:"tiles"`
+	Title types.String         `tfsdk:"title"`
 }
 
 func (r *DashboardResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -50,11 +49,9 @@ func (r *DashboardResource) Schema(ctx context.Context, req resource.SchemaReque
 				Description: `Unique identifier for dashboard`,
 			},
 			"tiles": schema.StringAttribute{
+				CustomType:  jsontypes.NormalizedType{},
 				Required:    true,
 				Description: `Parsed as JSON.`,
-				Validators: []validator.String{
-					validators.IsValidJSON(),
-				},
 			},
 			"title": schema.StringAttribute{
 				Required: true,
@@ -101,7 +98,12 @@ func (r *DashboardResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	request := data.ToSharedDashboard()
+	request, requestDiags := data.ToSharedDashboard(ctx)
+	resp.Diagnostics.Append(requestDiags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	res, err := r.client.Dashboards.CreateDashboard(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
@@ -122,8 +124,17 @@ func (r *DashboardResource) Create(ctx context.Context, req resource.CreateReque
 		resp.Diagnostics.AddError("unexpected response from API. Got an unexpected response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromSharedDashboard(res.Dashboard)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	resp.Diagnostics.Append(data.RefreshFromSharedDashboard(ctx, res.Dashboard)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(refreshPlan(ctx, plan, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -147,13 +158,13 @@ func (r *DashboardResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	var id string
-	id = data.ID.ValueString()
+	request, requestDiags := data.ToOperationsGetDashboardRequest(ctx)
+	resp.Diagnostics.Append(requestDiags...)
 
-	request := operations.GetDashboardRequest{
-		ID: id,
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	res, err := r.client.Dashboards.GetDashboard(ctx, request)
+	res, err := r.client.Dashboards.GetDashboard(ctx, *request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
 		if res != nil && res.RawResponse != nil {
@@ -177,7 +188,11 @@ func (r *DashboardResource) Read(ctx context.Context, req resource.ReadRequest, 
 		resp.Diagnostics.AddError("unexpected response from API. Got an unexpected response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromSharedDashboard(res.Dashboard)
+	resp.Diagnostics.Append(data.RefreshFromSharedDashboard(ctx, res.Dashboard)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -197,15 +212,13 @@ func (r *DashboardResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	dashboard := data.ToSharedDashboard()
-	var id string
-	id = data.ID.ValueString()
+	request, requestDiags := data.ToOperationsPutDashboardRequest(ctx)
+	resp.Diagnostics.Append(requestDiags...)
 
-	request := operations.PutDashboardRequest{
-		Dashboard: dashboard,
-		ID:        id,
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	res, err := r.client.Dashboards.PutDashboard(ctx, request)
+	res, err := r.client.Dashboards.PutDashboard(ctx, *request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
 		if res != nil && res.RawResponse != nil {
@@ -225,8 +238,17 @@ func (r *DashboardResource) Update(ctx context.Context, req resource.UpdateReque
 		resp.Diagnostics.AddError("unexpected response from API. Got an unexpected response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromSharedDashboard(res.Dashboard)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	resp.Diagnostics.Append(data.RefreshFromSharedDashboard(ctx, res.Dashboard)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(refreshPlan(ctx, plan, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -250,13 +272,13 @@ func (r *DashboardResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	var id string
-	id = data.ID.ValueString()
+	request, requestDiags := data.ToOperationsDeleteDashboardRequest(ctx)
+	resp.Diagnostics.Append(requestDiags...)
 
-	request := operations.DeleteDashboardRequest{
-		ID: id,
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	res, err := r.client.Dashboards.DeleteDashboard(ctx, request)
+	res, err := r.client.Dashboards.DeleteDashboard(ctx, *request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
 		if res != nil && res.RawResponse != nil {

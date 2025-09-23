@@ -21,6 +21,7 @@ Dashboard API: API to store the dashboard configuration for the epilot 360 dashb
 <!-- $toc-max-depth=2 -->
 * [epilot-dashboard](#epilot-dashboard)
   * [Installation](#installation)
+  * [Authentication](#authentication)
   * [Available Resources and Data Sources](#available-resources-and-data-sources)
   * [Testing the provider locally](#testing-the-provider-locally)
 * [Development](#development)
@@ -38,7 +39,7 @@ terraform {
   required_providers {
     epilot-dashboard = {
       source  = "epilot-dev/epilot-dashboard"
-      version = "0.15.2"
+      version = "0.16.0"
     }
   }
 }
@@ -48,6 +49,19 @@ provider "epilot-dashboard" {
 }
 ```
 <!-- End Installation [installation] -->
+
+<!-- Start Authentication [security] -->
+## Authentication
+
+This provider supports authentication configuration via provider configuration.
+
+Available configuration:
+
+| Provider Attribute | Description |
+|---|---|
+| `epilot_auth` | Authorization header with epilot OAuth2 bearer token. |
+| `epilot_org` | Overrides the target organization to allow shared tenantaccess. |
+<!-- End Authentication [security] -->
 
 <!-- Start Available Resources and Data Sources [operations] -->
 ## Available Resources and Data Sources
