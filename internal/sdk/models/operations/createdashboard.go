@@ -18,30 +18,30 @@ type CreateDashboardResponse struct {
 	RawResponse *http.Response
 }
 
-func (o *CreateDashboardResponse) GetContentType() string {
-	if o == nil {
+func (c *CreateDashboardResponse) GetContentType() string {
+	if c == nil {
 		return ""
 	}
-	return o.ContentType
+	return c.ContentType
 }
 
-func (o *CreateDashboardResponse) GetDashboard() *shared.Dashboard {
-	if o == nil {
+func (c *CreateDashboardResponse) GetDashboard() *shared.Dashboard {
+	if c == nil {
 		return nil
 	}
-	return o.Dashboard
+	return c.Dashboard
 }
 
-func (o *CreateDashboardResponse) GetStatusCode() int {
-	if o == nil {
+func (c *CreateDashboardResponse) GetStatusCode() int {
+	if c == nil {
 		return 0
 	}
-	return o.StatusCode
+	return c.StatusCode
 }
 
-func (o *CreateDashboardResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (c *CreateDashboardResponse) GetRawResponse() *http.Response {
+	if c == nil {
 		return nil
 	}
-	return o.RawResponse
+	return c.RawResponse
 }

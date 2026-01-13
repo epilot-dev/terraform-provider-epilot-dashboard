@@ -11,11 +11,11 @@ type DeleteDashboardRequest struct {
 	ID string `pathParam:"style=simple,explode=false,name=id"`
 }
 
-func (o *DeleteDashboardRequest) GetID() string {
-	if o == nil {
+func (d *DeleteDashboardRequest) GetID() string {
+	if d == nil {
 		return ""
 	}
-	return o.ID
+	return d.ID
 }
 
 type DeleteDashboardResponse struct {
@@ -29,30 +29,30 @@ type DeleteDashboardResponse struct {
 	RawResponse *http.Response
 }
 
-func (o *DeleteDashboardResponse) GetContentType() string {
-	if o == nil {
+func (d *DeleteDashboardResponse) GetContentType() string {
+	if d == nil {
 		return ""
 	}
-	return o.ContentType
+	return d.ContentType
 }
 
-func (o *DeleteDashboardResponse) GetDashboard() *shared.Dashboard {
-	if o == nil {
+func (d *DeleteDashboardResponse) GetDashboard() *shared.Dashboard {
+	if d == nil {
 		return nil
 	}
-	return o.Dashboard
+	return d.Dashboard
 }
 
-func (o *DeleteDashboardResponse) GetStatusCode() int {
-	if o == nil {
+func (d *DeleteDashboardResponse) GetStatusCode() int {
+	if d == nil {
 		return 0
 	}
-	return o.StatusCode
+	return d.StatusCode
 }
 
-func (o *DeleteDashboardResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (d *DeleteDashboardResponse) GetRawResponse() *http.Response {
+	if d == nil {
 		return nil
 	}
-	return o.RawResponse
+	return d.RawResponse
 }
