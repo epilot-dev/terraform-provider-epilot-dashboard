@@ -3,12 +3,78 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/operations"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/shared"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func (r *DashboardResourceModel) ToSharedDashboard() *shared.Dashboard {
+func (r *DashboardResourceModel) RefreshFromSharedDashboard(ctx context.Context, resp *shared.Dashboard) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if resp != nil {
+		r.ID = types.StringPointerValue(resp.ID)
+		tilesResult, _ := json.Marshal(resp.Tiles)
+		r.Tiles = jsontypes.NewNormalizedValue(string(tilesResult))
+		r.Title = types.StringValue(resp.Title)
+	}
+
+	return diags
+}
+
+func (r *DashboardResourceModel) ToOperationsDeleteDashboardRequest(ctx context.Context) (*operations.DeleteDashboardRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var id string
+	id = r.ID.ValueString()
+
+	out := operations.DeleteDashboardRequest{
+		ID: id,
+	}
+
+	return &out, diags
+}
+
+func (r *DashboardResourceModel) ToOperationsGetDashboardRequest(ctx context.Context) (*operations.GetDashboardRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var id string
+	id = r.ID.ValueString()
+
+	out := operations.GetDashboardRequest{
+		ID: id,
+	}
+
+	return &out, diags
+}
+
+func (r *DashboardResourceModel) ToOperationsPutDashboardRequest(ctx context.Context) (*operations.PutDashboardRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	dashboard, dashboardDiags := r.ToSharedDashboard(ctx)
+	diags.Append(dashboardDiags...)
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var id string
+	id = r.ID.ValueString()
+
+	out := operations.PutDashboardRequest{
+		Dashboard: dashboard,
+		ID:        id,
+	}
+
+	return &out, diags
+}
+
+func (r *DashboardResourceModel) ToSharedDashboard(ctx context.Context) (*shared.Dashboard, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	id := new(string)
 	if !r.ID.IsUnknown() && !r.ID.IsNull() {
 		*id = r.ID.ValueString()
@@ -25,14 +91,6 @@ func (r *DashboardResourceModel) ToSharedDashboard() *shared.Dashboard {
 		Tiles: tiles,
 		Title: title,
 	}
-	return &out
-}
 
-func (r *DashboardResourceModel) RefreshFromSharedDashboard(resp *shared.Dashboard) {
-	if resp != nil {
-		r.ID = types.StringPointerValue(resp.ID)
-		tilesResult, _ := json.Marshal(resp.Tiles)
-		r.Tiles = types.StringValue(string(tilesResult))
-		r.Title = types.StringValue(resp.Title)
-	}
+	return &out, diags
 }

@@ -10,23 +10,23 @@ type Dashboard struct {
 	Title string  `json:"title"`
 }
 
-func (o *Dashboard) GetID() *string {
-	if o == nil {
+func (d *Dashboard) GetID() *string {
+	if d == nil {
 		return nil
 	}
-	return o.ID
+	return d.ID
 }
 
-func (o *Dashboard) GetTiles() any {
-	if o == nil {
+func (d *Dashboard) GetTiles() any {
+	if d == nil {
 		return nil
 	}
-	return o.Tiles
+	return d.Tiles
 }
 
-func (o *Dashboard) GetTitle() string {
-	if o == nil {
+func (d *Dashboard) GetTitle() string {
+	if d == nil {
 		return ""
 	}
-	return o.Title
+	return d.Title
 }

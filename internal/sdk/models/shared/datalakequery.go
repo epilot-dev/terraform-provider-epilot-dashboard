@@ -19,43 +19,43 @@ func (d DatalakeQuery) MarshalJSON() ([]byte, error) {
 }
 
 func (d *DatalakeQuery) UnmarshalJSON(data []byte) error {
-	if err := utils.UnmarshalJSON(data, &d, "", false, false); err != nil {
+	if err := utils.UnmarshalJSON(data, &d, "", false, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (o *DatalakeQuery) GetAdditionalProperties() any {
-	if o == nil {
+func (d *DatalakeQuery) GetAdditionalProperties() any {
+	if d == nil {
 		return nil
 	}
-	return o.AdditionalProperties
+	return d.AdditionalProperties
 }
 
-func (o *DatalakeQuery) GetDataset() *string {
-	if o == nil {
+func (d *DatalakeQuery) GetDataset() *string {
+	if d == nil {
 		return nil
 	}
-	return o.Dataset
+	return d.Dataset
 }
 
-func (o *DatalakeQuery) GetDimensions() []map[string]any {
-	if o == nil {
+func (d *DatalakeQuery) GetDimensions() []map[string]any {
+	if d == nil {
 		return nil
 	}
-	return o.Dimensions
+	return d.Dimensions
 }
 
-func (o *DatalakeQuery) GetFilters() []map[string]any {
-	if o == nil {
+func (d *DatalakeQuery) GetFilters() []map[string]any {
+	if d == nil {
 		return nil
 	}
-	return o.Filters
+	return d.Filters
 }
 
-func (o *DatalakeQuery) GetMeasure() *string {
-	if o == nil {
+func (d *DatalakeQuery) GetMeasure() *string {
+	if d == nil {
 		return nil
 	}
-	return o.Measure
+	return d.Measure
 }

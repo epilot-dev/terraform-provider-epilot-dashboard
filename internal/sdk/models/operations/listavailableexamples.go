@@ -12,11 +12,11 @@ type ListAvailableExamplesResponseBody struct {
 	Results []shared.Example `json:"results,omitempty"`
 }
 
-func (o *ListAvailableExamplesResponseBody) GetResults() []shared.Example {
-	if o == nil {
+func (l *ListAvailableExamplesResponseBody) GetResults() []shared.Example {
+	if l == nil {
 		return nil
 	}
-	return o.Results
+	return l.Results
 }
 
 type ListAvailableExamplesResponse struct {
@@ -30,30 +30,30 @@ type ListAvailableExamplesResponse struct {
 	Object *ListAvailableExamplesResponseBody
 }
 
-func (o *ListAvailableExamplesResponse) GetContentType() string {
-	if o == nil {
+func (l *ListAvailableExamplesResponse) GetContentType() string {
+	if l == nil {
 		return ""
 	}
-	return o.ContentType
+	return l.ContentType
 }
 
-func (o *ListAvailableExamplesResponse) GetStatusCode() int {
-	if o == nil {
+func (l *ListAvailableExamplesResponse) GetStatusCode() int {
+	if l == nil {
 		return 0
 	}
-	return o.StatusCode
+	return l.StatusCode
 }
 
-func (o *ListAvailableExamplesResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (l *ListAvailableExamplesResponse) GetRawResponse() *http.Response {
+	if l == nil {
 		return nil
 	}
-	return o.RawResponse
+	return l.RawResponse
 }
 
-func (o *ListAvailableExamplesResponse) GetObject() *ListAvailableExamplesResponseBody {
-	if o == nil {
+func (l *ListAvailableExamplesResponse) GetObject() *ListAvailableExamplesResponseBody {
+	if l == nil {
 		return nil
 	}
-	return o.Object
+	return l.Object
 }
