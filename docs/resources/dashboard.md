@@ -36,6 +36,17 @@ resource "epilot-dashboard_dashboard" "my_dashboard" {
 
 Import is supported using the following syntax:
 
+In Terraform v1.5.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can be used with the `id` attribute, for example:
+
+```terraform
+import {
+  to = epilot-dashboard_dashboard.my_epilot-dashboard_dashboard
+  id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
 ```shell
 terraform import epilot-dashboard_dashboard.my_epilot-dashboard_dashboard "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 ```
