@@ -12,11 +12,11 @@ type ListDashboardsResponseBody struct {
 	Results []shared.Dashboard `json:"results,omitempty"`
 }
 
-func (o *ListDashboardsResponseBody) GetResults() []shared.Dashboard {
-	if o == nil {
+func (l *ListDashboardsResponseBody) GetResults() []shared.Dashboard {
+	if l == nil {
 		return nil
 	}
-	return o.Results
+	return l.Results
 }
 
 type ListDashboardsResponse struct {
@@ -30,30 +30,30 @@ type ListDashboardsResponse struct {
 	Object *ListDashboardsResponseBody
 }
 
-func (o *ListDashboardsResponse) GetContentType() string {
-	if o == nil {
+func (l *ListDashboardsResponse) GetContentType() string {
+	if l == nil {
 		return ""
 	}
-	return o.ContentType
+	return l.ContentType
 }
 
-func (o *ListDashboardsResponse) GetStatusCode() int {
-	if o == nil {
+func (l *ListDashboardsResponse) GetStatusCode() int {
+	if l == nil {
 		return 0
 	}
-	return o.StatusCode
+	return l.StatusCode
 }
 
-func (o *ListDashboardsResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (l *ListDashboardsResponse) GetRawResponse() *http.Response {
+	if l == nil {
 		return nil
 	}
-	return o.RawResponse
+	return l.RawResponse
 }
 
-func (o *ListDashboardsResponse) GetObject() *ListDashboardsResponseBody {
-	if o == nil {
+func (l *ListDashboardsResponse) GetObject() *ListDashboardsResponseBody {
+	if l == nil {
 		return nil
 	}
-	return o.Object
+	return l.Object
 }

@@ -14,37 +14,37 @@ type Visualisation struct {
 	Visualisation *VisualisationID `json:"visualisation,omitempty"`
 }
 
-func (o *Visualisation) GetDescription() *string {
-	if o == nil {
+func (v *Visualisation) GetDescription() *string {
+	if v == nil {
 		return nil
 	}
-	return o.Description
+	return v.Description
 }
 
-func (o *Visualisation) GetImportURL() *string {
-	if o == nil {
+func (v *Visualisation) GetImportURL() *string {
+	if v == nil {
 		return nil
 	}
-	return o.ImportURL
+	return v.ImportURL
 }
 
-func (o *Visualisation) GetPackageName() *string {
-	if o == nil {
+func (v *Visualisation) GetPackageName() *string {
+	if v == nil {
 		return nil
 	}
-	return o.PackageName
+	return v.PackageName
 }
 
-func (o *Visualisation) GetTitle() *string {
-	if o == nil {
+func (v *Visualisation) GetTitle() *string {
+	if v == nil {
 		return nil
 	}
-	return o.Title
+	return v.Title
 }
 
-func (o *Visualisation) GetVisualisation() *VisualisationID {
-	if o == nil {
+func (v *Visualisation) GetVisualisation() *VisualisationID {
+	if v == nil {
 		return nil
 	}
-	return o.Visualisation
+	return v.Visualisation
 }

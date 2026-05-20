@@ -11,30 +11,30 @@ type Example struct {
 	Visualisation *VisualisationID `json:"visualisation,omitempty"`
 }
 
-func (o *Example) GetID() *string {
-	if o == nil {
+func (e *Example) GetID() *string {
+	if e == nil {
 		return nil
 	}
-	return o.ID
+	return e.ID
 }
 
-func (o *Example) GetQuery() *DatalakeQuery {
-	if o == nil {
+func (e *Example) GetQuery() *DatalakeQuery {
+	if e == nil {
 		return nil
 	}
-	return o.Query
+	return e.Query
 }
 
-func (o *Example) GetTitle() *string {
-	if o == nil {
+func (e *Example) GetTitle() *string {
+	if e == nil {
 		return nil
 	}
-	return o.Title
+	return e.Title
 }
 
-func (o *Example) GetVisualisation() *VisualisationID {
-	if o == nil {
+func (e *Example) GetVisualisation() *VisualisationID {
+	if e == nil {
 		return nil
 	}
-	return o.Visualisation
+	return e.Visualisation
 }
