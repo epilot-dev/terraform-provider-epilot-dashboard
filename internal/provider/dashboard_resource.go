@@ -5,9 +5,14 @@ package provider
 import (
 	"context"
 	"fmt"
+	tfTypes "github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/provider/types"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk"
-	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/operations"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/validators"
+	speakeasy_objectvalidators "github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/validators/objectvalidators"
+	speakeasy_stringvalidators "github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/validators/stringvalidators"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -26,14 +31,23 @@ func NewDashboardResource() resource.Resource {
 
 // DashboardResource defines the resource implementation.
 type DashboardResource struct {
+	// Provider configured SDK client.
 	client *sdk.SDK
 }
 
 // DashboardResourceModel describes the resource data model.
 type DashboardResourceModel struct {
-	ID    types.String `tfsdk:"id"`
-	Tiles types.String `tfsdk:"tiles"`
-	Title types.String `tfsdk:"title"`
+	CreatedAt  types.String            `tfsdk:"created_at"`
+	CreatedBy  types.String            `tfsdk:"created_by"`
+	ID         types.String            `tfsdk:"id"`
+	OrgAccess  *tfTypes.OrgAccess      `tfsdk:"org_access"`
+	OwnerOrgID types.String            `tfsdk:"owner_org_id"`
+	Owners     []types.String          `tfsdk:"owners"`
+	SharedWith []tfTypes.ShareGrant    `tfsdk:"shared_with"`
+	Tiles      []tfTypes.DashboardTile `tfsdk:"tiles"`
+	Title      types.String            `tfsdk:"title"`
+	UpdatedAt  types.String            `tfsdk:"updated_at"`
+	UpdatedBy  types.String            `tfsdk:"updated_by"`
 }
 
 func (r *DashboardResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -44,20 +58,205 @@ func (r *DashboardResource) Schema(ctx context.Context, req resource.SchemaReque
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Dashboard Resource",
 		Attributes: map[string]schema.Attribute{
+			"created_at": schema.StringAttribute{
+				Computed: true,
+			},
+			"created_by": schema.StringAttribute{
+				Computed:    true,
+				Description: `Id of the user who created the resource`,
+			},
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Optional:    true,
 				Description: `Unique identifier for dashboard`,
 			},
-			"tiles": schema.StringAttribute{
-				Required:    true,
-				Description: `Parsed as JSON.`,
-				Validators: []validator.String{
-					validators.IsValidJSON(),
+			"org_access": schema.SingleNestedAttribute{
+				Computed: true,
+				Optional: true,
+				Attributes: map[string]schema.Attribute{
+					"any": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Optional:    true,
+						Description: `Parsed as JSON.`,
+						Validators: []validator.String{
+							stringvalidator.ConflictsWith(path.Expressions{
+								path.MatchRelative().AtParent().AtName("one"),
+							}...),
+						},
+					},
+					"one": schema.StringAttribute{
+						Optional:    true,
+						Description: `must be one of ["view", "edit"]`,
+						Validators: []validator.String{
+							stringvalidator.ConflictsWith(path.Expressions{
+								path.MatchRelative().AtParent().AtName("any"),
+							}...),
+							stringvalidator.OneOf(
+								"view",
+								"edit",
+							),
+						},
+					},
+				},
+				MarkdownDescription: `Optional organization-wide grant. When set, every user in the resource's organization` + "\n" +
+					`is granted this permission level. ` + "`" + `null` + "`" + ` (or omitted) means the resource is not shared` + "\n" +
+					`org-wide.`,
+			},
+			"owner_org_id": schema.StringAttribute{
+				Computed:    true,
+				Description: `Id of the organisation that owns the resource. Set at creation time and immutable.`,
+			},
+			"owners": schema.ListAttribute{
+				Computed:    true,
+				Optional:    true,
+				ElementType: types.StringType,
+				MarkdownDescription: `User ids with full control over the resource (view, edit, delete and manage sharing).` + "\n" +
+					`The creator is always an owner. There must always be at least one owner.`,
+			},
+			"shared_with": schema.ListNestedAttribute{
+				Computed: true,
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{
+					Validators: []validator.Object{
+						speakeasy_objectvalidators.NotNull(),
+					},
+					Attributes: map[string]schema.Attribute{
+						"permission": schema.StringAttribute{
+							Computed: true,
+							Optional: true,
+							MarkdownDescription: `Permission level granted to a user (or the whole organization) on a shared resource.` + "\n" +
+								`` + "`" + `view` + "`" + ` allows read-only access; ` + "`" + `edit` + "`" + ` additionally allows updating the content.` + "\n" +
+								`Full control (delete and managing sharing) is reserved for owners.` + "\n" +
+								`Not Null; must be one of ["view", "edit"]`,
+							Validators: []validator.String{
+								speakeasy_stringvalidators.NotNull(),
+								stringvalidator.OneOf(
+									"view",
+									"edit",
+								),
+							},
+						},
+						"user_id": schema.StringAttribute{
+							Computed:    true,
+							Optional:    true,
+							Description: `The id of the user the resource is shared with. Not Null`,
+							Validators: []validator.String{
+								speakeasy_stringvalidators.NotNull(),
+							},
+						},
+					},
+				},
+				Description: `Per-user sharing grants`,
+			},
+			"tiles": schema.ListNestedAttribute{
+				Required: true,
+				NestedObject: schema.NestedAttributeObject{
+					Validators: []validator.Object{
+						speakeasy_objectvalidators.NotNull(),
+					},
+					Attributes: map[string]schema.Attribute{
+						"coordinates": schema.SingleNestedAttribute{
+							Computed: true,
+							Optional: true,
+						},
+						"id": schema.StringAttribute{
+							Computed:    true,
+							Optional:    true,
+							Description: `Unique identifier for a tile in a dashboard`,
+						},
+						"insight_id": schema.StringAttribute{
+							Computed:    true,
+							Optional:    true,
+							Description: `Unique identifier for an insight (a saved chart / visualisation)`,
+						},
+						"title": schema.StringAttribute{
+							Computed: true,
+							Optional: true,
+						},
+						"visualisation_config": schema.SingleNestedAttribute{
+							Computed: true,
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"timechart_visualisation_config": schema.SingleNestedAttribute{
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"options": schema.MapAttribute{
+											Computed:    true,
+											Optional:    true,
+											ElementType: jsontypes.NormalizedType{},
+											Validators: []validator.Map{
+												mapvalidator.ValueStringsAre(validators.IsValidJSON()),
+											},
+										},
+										"query": schema.SingleNestedAttribute{
+											Computed: true,
+											Optional: true,
+											Attributes: map[string]schema.Attribute{
+												"additional_properties": schema.StringAttribute{
+													CustomType:  jsontypes.NormalizedType{},
+													Computed:    true,
+													Optional:    true,
+													Description: `Parsed as JSON.`,
+												},
+												"dataset": schema.StringAttribute{
+													Computed: true,
+													Optional: true,
+												},
+												"dimensions": schema.ListAttribute{
+													Computed: true,
+													Optional: true,
+													ElementType: types.MapType{
+														ElemType: jsontypes.NormalizedType{},
+													},
+												},
+												"filters": schema.ListAttribute{
+													Computed: true,
+													Optional: true,
+													ElementType: types.MapType{
+														ElemType: jsontypes.NormalizedType{},
+													},
+												},
+												"measure": schema.StringAttribute{
+													Computed: true,
+													Optional: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"visualisation_id": schema.StringAttribute{
+							Computed:    true,
+							Optional:    true,
+							Description: `Unique identifier for a Visualisation. must be one of ["kpi", "funnel", "toplist", "timechart", "pie", "bar", "entity_list", "markdown", "news_feed", "workflow"]`,
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"kpi",
+									"funnel",
+									"toplist",
+									"timechart",
+									"pie",
+									"bar",
+									"entity_list",
+									"markdown",
+									"news_feed",
+									"workflow",
+								),
+							},
+						},
+					},
 				},
 			},
 			"title": schema.StringAttribute{
 				Required: true,
+			},
+			"updated_at": schema.StringAttribute{
+				Computed: true,
+			},
+			"updated_by": schema.StringAttribute{
+				Computed:    true,
+				Description: `Id of the user who last updated the resource`,
 			},
 		},
 	}
@@ -101,7 +300,12 @@ func (r *DashboardResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	request := data.ToSharedDashboard()
+	request, requestDiags := data.ToSharedDashboardInput(ctx)
+	resp.Diagnostics.Append(requestDiags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	res, err := r.client.Dashboards.CreateDashboard(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
@@ -122,8 +326,17 @@ func (r *DashboardResource) Create(ctx context.Context, req resource.CreateReque
 		resp.Diagnostics.AddError("unexpected response from API. Got an unexpected response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromSharedDashboard(res.Dashboard)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	resp.Diagnostics.Append(data.RefreshFromSharedDashboard(ctx, res.Dashboard)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(refreshPlan(ctx, plan, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -147,13 +360,13 @@ func (r *DashboardResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	var id string
-	id = data.ID.ValueString()
+	request, requestDiags := data.ToOperationsGetDashboardRequest(ctx)
+	resp.Diagnostics.Append(requestDiags...)
 
-	request := operations.GetDashboardRequest{
-		ID: id,
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	res, err := r.client.Dashboards.GetDashboard(ctx, request)
+	res, err := r.client.Dashboards.GetDashboard(ctx, *request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
 		if res != nil && res.RawResponse != nil {
@@ -177,7 +390,11 @@ func (r *DashboardResource) Read(ctx context.Context, req resource.ReadRequest, 
 		resp.Diagnostics.AddError("unexpected response from API. Got an unexpected response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromSharedDashboard(res.Dashboard)
+	resp.Diagnostics.Append(data.RefreshFromSharedDashboard(ctx, res.Dashboard)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -197,15 +414,13 @@ func (r *DashboardResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	dashboard := data.ToSharedDashboard()
-	var id string
-	id = data.ID.ValueString()
+	request, requestDiags := data.ToOperationsPutDashboardRequest(ctx)
+	resp.Diagnostics.Append(requestDiags...)
 
-	request := operations.PutDashboardRequest{
-		Dashboard: dashboard,
-		ID:        id,
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	res, err := r.client.Dashboards.PutDashboard(ctx, request)
+	res, err := r.client.Dashboards.PutDashboard(ctx, *request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
 		if res != nil && res.RawResponse != nil {
@@ -225,8 +440,17 @@ func (r *DashboardResource) Update(ctx context.Context, req resource.UpdateReque
 		resp.Diagnostics.AddError("unexpected response from API. Got an unexpected response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromSharedDashboard(res.Dashboard)
-	refreshPlan(ctx, plan, &data, resp.Diagnostics)
+	resp.Diagnostics.Append(data.RefreshFromSharedDashboard(ctx, res.Dashboard)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(refreshPlan(ctx, plan, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -250,13 +474,13 @@ func (r *DashboardResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	var id string
-	id = data.ID.ValueString()
+	request, requestDiags := data.ToOperationsDeleteDashboardRequest(ctx)
+	resp.Diagnostics.Append(requestDiags...)
 
-	request := operations.DeleteDashboardRequest{
-		ID: id,
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	res, err := r.client.Dashboards.DeleteDashboard(ctx, request)
+	res, err := r.client.Dashboards.DeleteDashboard(ctx, *request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
 		if res != nil && res.RawResponse != nil {
@@ -268,7 +492,10 @@ func (r *DashboardResource) Delete(ctx context.Context, req resource.DeleteReque
 		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res))
 		return
 	}
-	if res.StatusCode != 200 {
+	switch res.StatusCode {
+	case 200, 404:
+		break
+	default:
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}

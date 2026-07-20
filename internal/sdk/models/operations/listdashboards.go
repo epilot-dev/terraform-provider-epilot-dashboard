@@ -3,20 +3,158 @@
 package operations
 
 import (
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/internal/utils"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/shared"
 	"net/http"
+	"time"
 )
+
+type ListDashboardsRequest struct {
+	// Filter to resources the given user id may view (owner, shared, org-wide or legacy).
+	AccessibleTo  *string    `queryParam:"style=form,explode=true,name=accessible_to"`
+	CreatedAfter  *time.Time `queryParam:"style=form,explode=true,name=created_after"`
+	CreatedBefore *time.Time `queryParam:"style=form,explode=true,name=created_before"`
+	// Filter by the id of the creating user.
+	CreatedBy *string `queryParam:"style=form,explode=true,name=created_by"`
+	// Maximum results to return (max 200). Omit to return all matching results (pagination is opt-in).
+	Limit *int64 `queryParam:"style=form,explode=true,name=limit"`
+	// Number of results to skip, for pagination. Use with limit (page N = offset N*limit).
+	Offset *int64 `default:"0" queryParam:"style=form,explode=true,name=offset"`
+	// Sort direction. Defaults to ascending (preserving the pre-migration order).
+	Order *shared.Order `default:"asc" queryParam:"style=form,explode=true,name=order"`
+	// Filter to resources owned by any of the given user ids.
+	Owner []string `queryParam:"style=form,explode=true,name=owner"`
+	// Free-text search over name/title and description (case-insensitive substring).
+	Q *string `queryParam:"style=form,explode=true,name=q"`
+	// Filter to resources shared with any of the given user ids.
+	SharedWith []string `queryParam:"style=form,explode=true,name=shared_with"`
+	// Field to sort by. `name` and `title` are aliases for the resource's display name and are normalised per resource: dashboards sort by `title` and insights by `name`, whichever of the two values is sent. String sorts are case-insensitive.
+	Sort          *shared.Sort `default:"updated_at" queryParam:"style=form,explode=true,name=sort"`
+	UpdatedAfter  *time.Time   `queryParam:"style=form,explode=true,name=updated_after"`
+	UpdatedBefore *time.Time   `queryParam:"style=form,explode=true,name=updated_before"`
+}
+
+func (l ListDashboardsRequest) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(l, "", false)
+}
+
+func (l *ListDashboardsRequest) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &l, "", false, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (l *ListDashboardsRequest) GetAccessibleTo() *string {
+	if l == nil {
+		return nil
+	}
+	return l.AccessibleTo
+}
+
+func (l *ListDashboardsRequest) GetCreatedAfter() *time.Time {
+	if l == nil {
+		return nil
+	}
+	return l.CreatedAfter
+}
+
+func (l *ListDashboardsRequest) GetCreatedBefore() *time.Time {
+	if l == nil {
+		return nil
+	}
+	return l.CreatedBefore
+}
+
+func (l *ListDashboardsRequest) GetCreatedBy() *string {
+	if l == nil {
+		return nil
+	}
+	return l.CreatedBy
+}
+
+func (l *ListDashboardsRequest) GetLimit() *int64 {
+	if l == nil {
+		return nil
+	}
+	return l.Limit
+}
+
+func (l *ListDashboardsRequest) GetOffset() *int64 {
+	if l == nil {
+		return nil
+	}
+	return l.Offset
+}
+
+func (l *ListDashboardsRequest) GetOrder() *shared.Order {
+	if l == nil {
+		return nil
+	}
+	return l.Order
+}
+
+func (l *ListDashboardsRequest) GetOwner() []string {
+	if l == nil {
+		return nil
+	}
+	return l.Owner
+}
+
+func (l *ListDashboardsRequest) GetQ() *string {
+	if l == nil {
+		return nil
+	}
+	return l.Q
+}
+
+func (l *ListDashboardsRequest) GetSharedWith() []string {
+	if l == nil {
+		return nil
+	}
+	return l.SharedWith
+}
+
+func (l *ListDashboardsRequest) GetSort() *shared.Sort {
+	if l == nil {
+		return nil
+	}
+	return l.Sort
+}
+
+func (l *ListDashboardsRequest) GetUpdatedAfter() *time.Time {
+	if l == nil {
+		return nil
+	}
+	return l.UpdatedAfter
+}
+
+func (l *ListDashboardsRequest) GetUpdatedBefore() *time.Time {
+	if l == nil {
+		return nil
+	}
+	return l.UpdatedBefore
+}
 
 // ListDashboardsResponseBody - List of dashboards available to the user
 type ListDashboardsResponseBody struct {
-	Results []shared.Dashboard `json:"results,omitempty"`
+	// Offset-based pagination metadata for list responses
+	Pagination shared.Pagination  `json:"pagination"`
+	Results    []shared.Dashboard `json:"results"`
 }
 
-func (o *ListDashboardsResponseBody) GetResults() []shared.Dashboard {
-	if o == nil {
-		return nil
+func (l *ListDashboardsResponseBody) GetPagination() shared.Pagination {
+	if l == nil {
+		return shared.Pagination{}
 	}
-	return o.Results
+	return l.Pagination
+}
+
+func (l *ListDashboardsResponseBody) GetResults() []shared.Dashboard {
+	if l == nil {
+		return []shared.Dashboard{}
+	}
+	return l.Results
 }
 
 type ListDashboardsResponse struct {
@@ -30,30 +168,30 @@ type ListDashboardsResponse struct {
 	Object *ListDashboardsResponseBody
 }
 
-func (o *ListDashboardsResponse) GetContentType() string {
-	if o == nil {
+func (l *ListDashboardsResponse) GetContentType() string {
+	if l == nil {
 		return ""
 	}
-	return o.ContentType
+	return l.ContentType
 }
 
-func (o *ListDashboardsResponse) GetStatusCode() int {
-	if o == nil {
+func (l *ListDashboardsResponse) GetStatusCode() int {
+	if l == nil {
 		return 0
 	}
-	return o.StatusCode
+	return l.StatusCode
 }
 
-func (o *ListDashboardsResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (l *ListDashboardsResponse) GetRawResponse() *http.Response {
+	if l == nil {
 		return nil
 	}
-	return o.RawResponse
+	return l.RawResponse
 }
 
-func (o *ListDashboardsResponse) GetObject() *ListDashboardsResponseBody {
-	if o == nil {
+func (l *ListDashboardsResponse) GetObject() *ListDashboardsResponseBody {
+	if l == nil {
 		return nil
 	}
-	return o.Object
+	return l.Object
 }

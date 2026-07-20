@@ -14,8 +14,52 @@ Dashboard Resource
 
 ```terraform
 resource "epilot-dashboard_dashboard" "my_dashboard" {
-  id    = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-  tiles = "{ \"see\": \"documentation\" }"
+  id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  org_access = {
+    one = "view"
+  }
+  owners = [
+    "10598",
+  ]
+  shared_with = [
+    {
+      permission = "view"
+      user_id    = "10598"
+    }
+  ]
+  tiles = [
+    {
+      coordinates = {
+        # ...
+      }
+      id         = "e4af1297-1fd6-440f-9846-f475f580d40f"
+      insight_id = "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
+      title      = "Number of opportunities created by journeys every month"
+      visualisation_config = {
+        timechart_visualisation_config = {
+          options = {
+            key = jsonencode("value")
+          }
+          query = {
+            additional_properties = "{ \"see\": \"documentation\" }"
+            dataset               = "entity_operations"
+            dimensions = [
+              {
+                # ...
+              }
+            ]
+            filters = [
+              {
+                # ...
+              }
+            ]
+            measure = "count_operations"
+          }
+        }
+      }
+      visualisation_id = "timechart"
+    }
+  ]
   title = "Employee Dashboard"
 }
 ```
@@ -25,16 +69,107 @@ resource "epilot-dashboard_dashboard" "my_dashboard" {
 
 ### Required
 
-- `tiles` (String) Parsed as JSON.
+- `tiles` (Attributes List) (see [below for nested schema](#nestedatt--tiles))
 - `title` (String)
 
 ### Optional
 
 - `id` (String) Unique identifier for dashboard
+- `org_access` (Attributes) Optional organization-wide grant. When set, every user in the resource's organization
+is granted this permission level. `null` (or omitted) means the resource is not shared
+org-wide. (see [below for nested schema](#nestedatt--org_access))
+- `owners` (List of String) User ids with full control over the resource (view, edit, delete and manage sharing).
+The creator is always an owner. There must always be at least one owner.
+- `shared_with` (Attributes List) Per-user sharing grants (see [below for nested schema](#nestedatt--shared_with))
+
+### Read-Only
+
+- `created_at` (String)
+- `created_by` (String) Id of the user who created the resource
+- `owner_org_id` (String) Id of the organisation that owns the resource. Set at creation time and immutable.
+- `updated_at` (String)
+- `updated_by` (String) Id of the user who last updated the resource
+
+<a id="nestedatt--tiles"></a>
+### Nested Schema for `tiles`
+
+Optional:
+
+- `coordinates` (Attributes) (see [below for nested schema](#nestedatt--tiles--coordinates))
+- `id` (String) Unique identifier for a tile in a dashboard
+- `insight_id` (String) Unique identifier for an insight (a saved chart / visualisation)
+- `title` (String)
+- `visualisation_config` (Attributes) (see [below for nested schema](#nestedatt--tiles--visualisation_config))
+- `visualisation_id` (String) Unique identifier for a Visualisation. must be one of ["kpi", "funnel", "toplist", "timechart", "pie", "bar", "entity_list", "markdown", "news_feed", "workflow"]
+
+<a id="nestedatt--tiles--coordinates"></a>
+### Nested Schema for `tiles.coordinates`
+
+
+<a id="nestedatt--tiles--visualisation_config"></a>
+### Nested Schema for `tiles.visualisation_config`
+
+Optional:
+
+- `timechart_visualisation_config` (Attributes) (see [below for nested schema](#nestedatt--tiles--visualisation_config--timechart_visualisation_config))
+
+<a id="nestedatt--tiles--visualisation_config--timechart_visualisation_config"></a>
+### Nested Schema for `tiles.visualisation_config.timechart_visualisation_config`
+
+Optional:
+
+- `options` (Map of String)
+- `query` (Attributes) (see [below for nested schema](#nestedatt--tiles--visualisation_config--timechart_visualisation_config--query))
+
+<a id="nestedatt--tiles--visualisation_config--timechart_visualisation_config--query"></a>
+### Nested Schema for `tiles.visualisation_config.timechart_visualisation_config.query`
+
+Optional:
+
+- `additional_properties` (String) Parsed as JSON.
+- `dataset` (String)
+- `dimensions` (List of Map of String)
+- `filters` (List of Map of String)
+- `measure` (String)
+
+
+
+
+
+<a id="nestedatt--org_access"></a>
+### Nested Schema for `org_access`
+
+Optional:
+
+- `any` (String) Parsed as JSON.
+- `one` (String) must be one of ["view", "edit"]
+
+
+<a id="nestedatt--shared_with"></a>
+### Nested Schema for `shared_with`
+
+Optional:
+
+- `permission` (String) Permission level granted to a user (or the whole organization) on a shared resource.
+`view` allows read-only access; `edit` additionally allows updating the content.
+Full control (delete and managing sharing) is reserved for owners.
+Not Null; must be one of ["view", "edit"]
+- `user_id` (String) The id of the user the resource is shared with. Not Null
 
 ## Import
 
 Import is supported using the following syntax:
+
+In Terraform v1.5.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can be used with the `id` attribute, for example:
+
+```terraform
+import {
+  to = epilot-dashboard_dashboard.my_epilot-dashboard_dashboard
+  id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
 terraform import epilot-dashboard_dashboard.my_epilot-dashboard_dashboard "3fa85f64-5717-4562-b3fc-2c963f66afa6"
