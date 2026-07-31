@@ -2,31 +2,124 @@
 
 package shared
 
-// Dashboard - Adashboard configuration with tiles
+import (
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/internal/utils"
+	"time"
+)
+
+// Dashboard - A dashboard configuration. A dashboard is a canvas whose tiles arrange and
+// position insights (saved charts). Tiles may reference an insight by `insight_id`
+// or, for backwards compatibility, embed a visualisation inline.
 type Dashboard struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	// Id of the user who created the resource
+	CreatedBy *string `json:"created_by,omitempty"`
 	// Unique identifier for dashboard
-	ID    *string `json:"id,omitempty"`
-	Tiles any     `json:"tiles"`
-	Title string  `json:"title"`
+	ID *string `json:"id,omitempty"`
+	// Optional organization-wide grant. When set, every user in the resource's organization
+	// is granted this permission level. `null` (or omitted) means the resource is not shared
+	// org-wide.
+	//
+	OrgAccess *OrgAccess `json:"org_access,omitempty"`
+	// Id of the organisation that owns the resource. Set at creation time and immutable.
+	OwnerOrgID *string `json:"owner_org_id,omitempty"`
+	// User ids with full control over the resource (view, edit, delete and manage sharing).
+	// The creator is always an owner. There must always be at least one owner.
+	//
+	Owners []string `json:"owners,omitempty"`
+	// Per-user sharing grants
+	SharedWith []ShareGrant    `json:"shared_with,omitempty"`
+	Tiles      []DashboardTile `json:"tiles"`
+	Title      string          `json:"title"`
+	UpdatedAt  *time.Time      `json:"updated_at,omitempty"`
+	// Id of the user who last updated the resource
+	UpdatedBy *string `json:"updated_by,omitempty"`
 }
 
-func (o *Dashboard) GetID() *string {
-	if o == nil {
+func (d Dashboard) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(d, "", false)
+}
+
+func (d *Dashboard) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &d, "", false, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *Dashboard) GetCreatedAt() *time.Time {
+	if d == nil {
 		return nil
 	}
-	return o.ID
+	return d.CreatedAt
 }
 
-func (o *Dashboard) GetTiles() any {
-	if o == nil {
+func (d *Dashboard) GetCreatedBy() *string {
+	if d == nil {
 		return nil
 	}
-	return o.Tiles
+	return d.CreatedBy
 }
 
-func (o *Dashboard) GetTitle() string {
-	if o == nil {
+func (d *Dashboard) GetID() *string {
+	if d == nil {
+		return nil
+	}
+	return d.ID
+}
+
+func (d *Dashboard) GetOrgAccess() *OrgAccess {
+	if d == nil {
+		return nil
+	}
+	return d.OrgAccess
+}
+
+func (d *Dashboard) GetOwnerOrgID() *string {
+	if d == nil {
+		return nil
+	}
+	return d.OwnerOrgID
+}
+
+func (d *Dashboard) GetOwners() []string {
+	if d == nil {
+		return nil
+	}
+	return d.Owners
+}
+
+func (d *Dashboard) GetSharedWith() []ShareGrant {
+	if d == nil {
+		return nil
+	}
+	return d.SharedWith
+}
+
+func (d *Dashboard) GetTiles() []DashboardTile {
+	if d == nil {
+		return []DashboardTile{}
+	}
+	return d.Tiles
+}
+
+func (d *Dashboard) GetTitle() string {
+	if d == nil {
 		return ""
 	}
-	return o.Title
+	return d.Title
+}
+
+func (d *Dashboard) GetUpdatedAt() *time.Time {
+	if d == nil {
+		return nil
+	}
+	return d.UpdatedAt
+}
+
+func (d *Dashboard) GetUpdatedBy() *string {
+	if d == nil {
+		return nil
+	}
+	return d.UpdatedBy
 }

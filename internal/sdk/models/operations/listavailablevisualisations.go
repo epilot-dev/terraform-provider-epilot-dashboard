@@ -12,11 +12,11 @@ type ListAvailableVisualisationsResponseBody struct {
 	Results []shared.Visualisation `json:"results,omitempty"`
 }
 
-func (o *ListAvailableVisualisationsResponseBody) GetResults() []shared.Visualisation {
-	if o == nil {
+func (l *ListAvailableVisualisationsResponseBody) GetResults() []shared.Visualisation {
+	if l == nil {
 		return nil
 	}
-	return o.Results
+	return l.Results
 }
 
 type ListAvailableVisualisationsResponse struct {
@@ -30,30 +30,30 @@ type ListAvailableVisualisationsResponse struct {
 	Object *ListAvailableVisualisationsResponseBody
 }
 
-func (o *ListAvailableVisualisationsResponse) GetContentType() string {
-	if o == nil {
+func (l *ListAvailableVisualisationsResponse) GetContentType() string {
+	if l == nil {
 		return ""
 	}
-	return o.ContentType
+	return l.ContentType
 }
 
-func (o *ListAvailableVisualisationsResponse) GetStatusCode() int {
-	if o == nil {
+func (l *ListAvailableVisualisationsResponse) GetStatusCode() int {
+	if l == nil {
 		return 0
 	}
-	return o.StatusCode
+	return l.StatusCode
 }
 
-func (o *ListAvailableVisualisationsResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (l *ListAvailableVisualisationsResponse) GetRawResponse() *http.Response {
+	if l == nil {
 		return nil
 	}
-	return o.RawResponse
+	return l.RawResponse
 }
 
-func (o *ListAvailableVisualisationsResponse) GetObject() *ListAvailableVisualisationsResponseBody {
-	if o == nil {
+func (l *ListAvailableVisualisationsResponse) GetObject() *ListAvailableVisualisationsResponseBody {
+	if l == nil {
 		return nil
 	}
-	return o.Object
+	return l.Object
 }

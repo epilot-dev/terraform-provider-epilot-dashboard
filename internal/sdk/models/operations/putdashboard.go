@@ -9,22 +9,22 @@ import (
 
 type PutDashboardRequest struct {
 	// The updated dashboard
-	Dashboard *shared.Dashboard `request:"mediaType=application/json"`
-	ID        string            `pathParam:"style=simple,explode=false,name=id"`
+	Dashboard *shared.DashboardInput `request:"mediaType=application/json"`
+	ID        string                 `pathParam:"style=simple,explode=false,name=id"`
 }
 
-func (o *PutDashboardRequest) GetDashboard() *shared.Dashboard {
-	if o == nil {
+func (p *PutDashboardRequest) GetDashboard() *shared.DashboardInput {
+	if p == nil {
 		return nil
 	}
-	return o.Dashboard
+	return p.Dashboard
 }
 
-func (o *PutDashboardRequest) GetID() string {
-	if o == nil {
+func (p *PutDashboardRequest) GetID() string {
+	if p == nil {
 		return ""
 	}
-	return o.ID
+	return p.ID
 }
 
 type PutDashboardResponse struct {
@@ -38,30 +38,30 @@ type PutDashboardResponse struct {
 	RawResponse *http.Response
 }
 
-func (o *PutDashboardResponse) GetContentType() string {
-	if o == nil {
+func (p *PutDashboardResponse) GetContentType() string {
+	if p == nil {
 		return ""
 	}
-	return o.ContentType
+	return p.ContentType
 }
 
-func (o *PutDashboardResponse) GetDashboard() *shared.Dashboard {
-	if o == nil {
+func (p *PutDashboardResponse) GetDashboard() *shared.Dashboard {
+	if p == nil {
 		return nil
 	}
-	return o.Dashboard
+	return p.Dashboard
 }
 
-func (o *PutDashboardResponse) GetStatusCode() int {
-	if o == nil {
+func (p *PutDashboardResponse) GetStatusCode() int {
+	if p == nil {
 		return 0
 	}
-	return o.StatusCode
+	return p.StatusCode
 }
 
-func (o *PutDashboardResponse) GetRawResponse() *http.Response {
-	if o == nil {
+func (p *PutDashboardResponse) GetRawResponse() *http.Response {
+	if p == nil {
 		return nil
 	}
-	return o.RawResponse
+	return p.RawResponse
 }

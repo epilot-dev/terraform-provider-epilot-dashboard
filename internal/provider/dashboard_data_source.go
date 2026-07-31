@@ -5,8 +5,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	tfTypes "github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/provider/types"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk"
-	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/operations"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,14 +24,23 @@ func NewDashboardDataSource() datasource.DataSource {
 
 // DashboardDataSource is the data source implementation.
 type DashboardDataSource struct {
+	// Provider configured SDK client.
 	client *sdk.SDK
 }
 
 // DashboardDataSourceModel describes the data model.
 type DashboardDataSourceModel struct {
-	ID    types.String `tfsdk:"id"`
-	Tiles types.String `tfsdk:"tiles"`
-	Title types.String `tfsdk:"title"`
+	CreatedAt  types.String            `tfsdk:"created_at"`
+	CreatedBy  types.String            `tfsdk:"created_by"`
+	ID         types.String            `tfsdk:"id"`
+	OrgAccess  *tfTypes.OrgAccess      `tfsdk:"org_access"`
+	OwnerOrgID types.String            `tfsdk:"owner_org_id"`
+	Owners     []types.String          `tfsdk:"owners"`
+	SharedWith []tfTypes.ShareGrant    `tfsdk:"shared_with"`
+	Tiles      []tfTypes.DashboardTile `tfsdk:"tiles"`
+	Title      types.String            `tfsdk:"title"`
+	UpdatedAt  types.String            `tfsdk:"updated_at"`
+	UpdatedBy  types.String            `tfsdk:"updated_by"`
 }
 
 // Metadata returns the data source type name.
@@ -44,15 +54,137 @@ func (r *DashboardDataSource) Schema(ctx context.Context, req datasource.SchemaR
 		MarkdownDescription: "Dashboard DataSource",
 
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Required: true,
+			"created_at": schema.StringAttribute{
+				Computed: true,
 			},
-			"tiles": schema.StringAttribute{
+			"created_by": schema.StringAttribute{
 				Computed:    true,
-				Description: `Parsed as JSON.`,
+				Description: `Id of the user who created the resource`,
+			},
+			"id": schema.StringAttribute{
+				Required:    true,
+				Description: `Unique identifier for dashboard`,
+			},
+			"org_access": schema.SingleNestedAttribute{
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"any": schema.StringAttribute{
+						CustomType:  jsontypes.NormalizedType{},
+						Computed:    true,
+						Description: `Parsed as JSON.`,
+					},
+					"one": schema.StringAttribute{
+						Computed: true,
+					},
+				},
+				MarkdownDescription: `Optional organization-wide grant. When set, every user in the resource's organization` + "\n" +
+					`is granted this permission level. ` + "`" + `null` + "`" + ` (or omitted) means the resource is not shared` + "\n" +
+					`org-wide.`,
+			},
+			"owner_org_id": schema.StringAttribute{
+				Computed:    true,
+				Description: `Id of the organisation that owns the resource. Set at creation time and immutable.`,
+			},
+			"owners": schema.ListAttribute{
+				Computed:    true,
+				ElementType: types.StringType,
+				MarkdownDescription: `User ids with full control over the resource (view, edit, delete and manage sharing).` + "\n" +
+					`The creator is always an owner. There must always be at least one owner.`,
+			},
+			"shared_with": schema.ListNestedAttribute{
+				Computed: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"permission": schema.StringAttribute{
+							Computed: true,
+							MarkdownDescription: `Permission level granted to a user (or the whole organization) on a shared resource.` + "\n" +
+								`` + "`" + `view` + "`" + ` allows read-only access; ` + "`" + `edit` + "`" + ` additionally allows updating the content.` + "\n" +
+								`Full control (delete and managing sharing) is reserved for owners.`,
+						},
+						"user_id": schema.StringAttribute{
+							Computed:    true,
+							Description: `The id of the user the resource is shared with`,
+						},
+					},
+				},
+				Description: `Per-user sharing grants`,
+			},
+			"tiles": schema.ListNestedAttribute{
+				Computed: true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"coordinates": schema.SingleNestedAttribute{
+							Computed: true,
+						},
+						"id": schema.StringAttribute{
+							Computed:    true,
+							Description: `Unique identifier for a tile in a dashboard`,
+						},
+						"insight_id": schema.StringAttribute{
+							Computed:    true,
+							Description: `Unique identifier for an insight (a saved chart / visualisation)`,
+						},
+						"title": schema.StringAttribute{
+							Computed: true,
+						},
+						"visualisation_config": schema.SingleNestedAttribute{
+							Computed: true,
+							Attributes: map[string]schema.Attribute{
+								"timechart_visualisation_config": schema.SingleNestedAttribute{
+									Computed: true,
+									Attributes: map[string]schema.Attribute{
+										"options": schema.MapAttribute{
+											Computed:    true,
+											ElementType: jsontypes.NormalizedType{},
+										},
+										"query": schema.SingleNestedAttribute{
+											Computed: true,
+											Attributes: map[string]schema.Attribute{
+												"additional_properties": schema.StringAttribute{
+													CustomType:  jsontypes.NormalizedType{},
+													Computed:    true,
+													Description: `Parsed as JSON.`,
+												},
+												"dataset": schema.StringAttribute{
+													Computed: true,
+												},
+												"dimensions": schema.ListAttribute{
+													Computed: true,
+													ElementType: types.MapType{
+														ElemType: jsontypes.NormalizedType{},
+													},
+												},
+												"filters": schema.ListAttribute{
+													Computed: true,
+													ElementType: types.MapType{
+														ElemType: jsontypes.NormalizedType{},
+													},
+												},
+												"measure": schema.StringAttribute{
+													Computed: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"visualisation_id": schema.StringAttribute{
+							Computed:    true,
+							Description: `Unique identifier for a Visualisation`,
+						},
+					},
+				},
 			},
 			"title": schema.StringAttribute{
 				Computed: true,
+			},
+			"updated_at": schema.StringAttribute{
+				Computed: true,
+			},
+			"updated_by": schema.StringAttribute{
+				Computed:    true,
+				Description: `Id of the user who last updated the resource`,
 			},
 		},
 	}
@@ -96,13 +228,13 @@ func (r *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	var id string
-	id = data.ID.ValueString()
+	request, requestDiags := data.ToOperationsGetDashboardRequest(ctx)
+	resp.Diagnostics.Append(requestDiags...)
 
-	request := operations.GetDashboardRequest{
-		ID: id,
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	res, err := r.client.Dashboards.GetDashboard(ctx, request)
+	res, err := r.client.Dashboards.GetDashboard(ctx, *request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
 		if res != nil && res.RawResponse != nil {
@@ -114,10 +246,6 @@ func (r *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		resp.Diagnostics.AddError("unexpected response from API", fmt.Sprintf("%v", res))
 		return
 	}
-	if res.StatusCode == 404 {
-		resp.State.RemoveResource(ctx)
-		return
-	}
 	if res.StatusCode != 200 {
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
@@ -126,7 +254,11 @@ func (r *DashboardDataSource) Read(ctx context.Context, req datasource.ReadReque
 		resp.Diagnostics.AddError("unexpected response from API. Got an unexpected response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromSharedDashboard(res.Dashboard)
+	resp.Diagnostics.Append(data.RefreshFromSharedDashboard(ctx, res.Dashboard)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

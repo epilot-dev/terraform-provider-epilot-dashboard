@@ -3,16 +3,141 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/provider/typeconvert"
+	tfTypes "github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/provider/types"
+	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/operations"
 	"github.com/epilot-dev/terraform-provider-epilot-dashboard/internal/sdk/models/shared"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func (r *DashboardDataSourceModel) RefreshFromSharedDashboard(resp *shared.Dashboard) {
+func (r *DashboardDataSourceModel) RefreshFromSharedDashboard(ctx context.Context, resp *shared.Dashboard) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if resp != nil {
+		r.CreatedAt = types.StringPointerValue(typeconvert.TimePointerToStringPointer(resp.CreatedAt))
+		r.CreatedBy = types.StringPointerValue(resp.CreatedBy)
 		r.ID = types.StringPointerValue(resp.ID)
-		tilesResult, _ := json.Marshal(resp.Tiles)
-		r.Tiles = types.StringValue(string(tilesResult))
+		if resp.OrgAccess != nil {
+			r.OrgAccess = &tfTypes.OrgAccess{}
+			if resp.OrgAccess.Any != nil {
+				anyVarResult, _ := json.Marshal(resp.OrgAccess.Any)
+				r.OrgAccess.Any = jsontypes.NewNormalizedValue(string(anyVarResult))
+			}
+			if resp.OrgAccess.One != nil {
+				if resp.OrgAccess.One != nil {
+					r.OrgAccess.One = types.StringValue(string(*resp.OrgAccess.One))
+				} else {
+					r.OrgAccess.One = types.StringNull()
+				}
+			}
+		}
+		r.OwnerOrgID = types.StringPointerValue(resp.OwnerOrgID)
+		r.Owners = make([]types.String, 0, len(resp.Owners))
+		for _, v := range resp.Owners {
+			r.Owners = append(r.Owners, types.StringValue(v))
+		}
+		r.SharedWith = []tfTypes.ShareGrant{}
+
+		for _, sharedWithItem := range resp.SharedWith {
+			var sharedWith tfTypes.ShareGrant
+
+			sharedWith.Permission = types.StringValue(string(sharedWithItem.Permission))
+			sharedWith.UserID = types.StringValue(sharedWithItem.UserID)
+
+			r.SharedWith = append(r.SharedWith, sharedWith)
+		}
+		r.Tiles = []tfTypes.DashboardTile{}
+
+		for _, tilesItem := range resp.Tiles {
+			var tiles tfTypes.DashboardTile
+
+			if tilesItem.Coordinates == nil {
+				tiles.Coordinates = nil
+			} else {
+				tiles.Coordinates = &tfTypes.Coordinates{}
+			}
+			tiles.ID = types.StringPointerValue(tilesItem.ID)
+			tiles.InsightID = types.StringPointerValue(tilesItem.InsightID)
+			tiles.Title = types.StringPointerValue(tilesItem.Title)
+			if tilesItem.VisualisationConfig != nil {
+				tiles.VisualisationConfig = &tfTypes.VisualisationConfig{}
+				if tilesItem.VisualisationConfig.TimechartVisualisationConfig != nil {
+					tiles.VisualisationConfig.TimechartVisualisationConfig = &tfTypes.TimechartVisualisationConfig{}
+					if len(tilesItem.VisualisationConfig.TimechartVisualisationConfig.Options) > 0 {
+						tiles.VisualisationConfig.TimechartVisualisationConfig.Options = make(map[string]jsontypes.Normalized, len(tilesItem.VisualisationConfig.TimechartVisualisationConfig.Options))
+						for key, value := range tilesItem.VisualisationConfig.TimechartVisualisationConfig.Options {
+							result, _ := json.Marshal(value)
+							tiles.VisualisationConfig.TimechartVisualisationConfig.Options[key] = jsontypes.NewNormalizedValue(string(result))
+						}
+					}
+					if tilesItem.VisualisationConfig.TimechartVisualisationConfig.Query == nil {
+						tiles.VisualisationConfig.TimechartVisualisationConfig.Query = nil
+					} else {
+						tiles.VisualisationConfig.TimechartVisualisationConfig.Query = &tfTypes.DatalakeQuery{}
+						if tilesItem.VisualisationConfig.TimechartVisualisationConfig.Query.AdditionalProperties == nil {
+							tiles.VisualisationConfig.TimechartVisualisationConfig.Query.AdditionalProperties = jsontypes.NewNormalizedNull()
+						} else {
+							additionalPropertiesResult, _ := json.Marshal(tilesItem.VisualisationConfig.TimechartVisualisationConfig.Query.AdditionalProperties)
+							tiles.VisualisationConfig.TimechartVisualisationConfig.Query.AdditionalProperties = jsontypes.NewNormalizedValue(string(additionalPropertiesResult))
+						}
+						tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Dataset = types.StringPointerValue(tilesItem.VisualisationConfig.TimechartVisualisationConfig.Query.Dataset)
+						tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Dimensions = nil
+						for _, dimensionsItem := range tilesItem.VisualisationConfig.TimechartVisualisationConfig.Query.Dimensions {
+							var dimensions map[string]jsontypes.Normalized
+							if len(dimensionsItem) > 0 {
+								dimensions = make(map[string]jsontypes.Normalized, len(dimensionsItem))
+								for key1, value1 := range dimensionsItem {
+									result1, _ := json.Marshal(value1)
+									dimensions[key1] = jsontypes.NewNormalizedValue(string(result1))
+								}
+							}
+							tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Dimensions = append(tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Dimensions, dimensions)
+						}
+						tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Filters = nil
+						for _, filtersItem := range tilesItem.VisualisationConfig.TimechartVisualisationConfig.Query.Filters {
+							var filters map[string]jsontypes.Normalized
+							if len(filtersItem) > 0 {
+								filters = make(map[string]jsontypes.Normalized, len(filtersItem))
+								for key2, value2 := range filtersItem {
+									result2, _ := json.Marshal(value2)
+									filters[key2] = jsontypes.NewNormalizedValue(string(result2))
+								}
+							}
+							tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Filters = append(tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Filters, filters)
+						}
+						tiles.VisualisationConfig.TimechartVisualisationConfig.Query.Measure = types.StringPointerValue(tilesItem.VisualisationConfig.TimechartVisualisationConfig.Query.Measure)
+					}
+				}
+			}
+			if tilesItem.VisualisationID != nil {
+				tiles.VisualisationID = types.StringValue(string(*tilesItem.VisualisationID))
+			} else {
+				tiles.VisualisationID = types.StringNull()
+			}
+
+			r.Tiles = append(r.Tiles, tiles)
+		}
 		r.Title = types.StringValue(resp.Title)
+		r.UpdatedAt = types.StringPointerValue(typeconvert.TimePointerToStringPointer(resp.UpdatedAt))
+		r.UpdatedBy = types.StringPointerValue(resp.UpdatedBy)
 	}
+
+	return diags
+}
+
+func (r *DashboardDataSourceModel) ToOperationsGetDashboardRequest(ctx context.Context) (*operations.GetDashboardRequest, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var id string
+	id = r.ID.ValueString()
+
+	out := operations.GetDashboardRequest{
+		ID: id,
+	}
+
+	return &out, diags
 }
